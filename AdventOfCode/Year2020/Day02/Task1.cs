@@ -1,9 +1,11 @@
-﻿using AdventOfCode.Interfaces;
+﻿using AdventOfCode.DTO.Attributes;
+using AdventOfCode.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day02
 {
+    [ExpectedResult("556")]
     public class Task1 : IRunnableCode
     {
         public async Task<string> ExecuteAsync(string[] data)

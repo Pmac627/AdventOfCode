@@ -1,11 +1,45 @@
-﻿using AdventOfCode.Interfaces;
+﻿using AdventOfCode.DTO.Attributes;
+using AdventOfCode.Interfaces;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day04
 {
+	[ExpectedResult("101")]
     public class Task2 : IRunnableCode
     {
+        private const int _requiredValidParts = 7;
+        private const int _minBirthYear = 1920;
+        private const int _maxBirthYear = 2002;
+        private const int _minIssueYear = 2010;
+        private const int _maxIssueYear = 2020;
+        private const int _minExpireYear = 2020;
+        private const int _maxExpireYear = 2030;
+        private const int _minHeightCm = 150;
+        private const int _maxHeightCm = 193;
+        private const int _minHeightIn = 59;
+        private const int _maxHeightIn = 76;
+        private const int _hairColorCodeLength = 7;
+        private const int _passportIdLength = 9;
+
+        private const char _codeDelimiter = ' ';
+        private const char _codeValueDelimiter = ':';
+
+        private const string _codeBirthYear = "byr";
+        private const string _codeIssueYear = "iyr";
+        private const string _codeExpireYear = "eyr";
+        private const string _codeHeight = "hgt";
+        private const string _codeHairColor = "hcl";
+        private const string _codeEyeColor = "ecl";
+        private const string _codePassportId = "pid";
+        private const string _heightCmSuffix = "cm";
+        private const string _heightInSuffix = "in";
+        
+        private static readonly Regex _hairColorRegex = new Regex(@"^#(?:[0-9a-fA-F]{3}){1,2}$");
+        private static readonly Regex _passpordIdRegex = new Regex(@"^[0-9]{9}$");
+        private static readonly string[] _eyeColorOptions = new string[7] { "amb", "blu", "brn", "gry", "grn", "hzl", "oth" };
+
         public async Task<string> ExecuteAsync(string[] data)
         {
             var validCount = 0;
@@ -13,7 +47,7 @@ namespace AdventOfCode.Year2020.Day04
 
             foreach (var line in data)
             {
-                if (line == string.Empty)
+                if (string.IsNullOrWhiteSpace(line))
                 {
                     if (IsValid(partCounts))
                     {
@@ -25,16 +59,16 @@ namespace AdventOfCode.Year2020.Day04
                     continue;
                 }
 
-                var splitParts = line.Split(' ');
+                var splitParts = line.Split(_codeDelimiter);
 
                 foreach (var parts in splitParts)
                 {
-                    var x = parts.Split(':');
+                    var x = parts.Split(_codeValueDelimiter);
                     var val = x[1].ToString();
 
                     switch (x[0].ToString())
                     {
-                        case "byr":
+                        case _codeBirthYear:
 
                             if (ValidateBirthYear(val))
                             {
@@ -42,7 +76,7 @@ namespace AdventOfCode.Year2020.Day04
                             }
 
                             break;
-                        case "iyr":
+                        case _codeIssueYear:
 
                             if (ValidateIssueYear(val))
                             {
@@ -50,7 +84,7 @@ namespace AdventOfCode.Year2020.Day04
                             }
 
                             break;
-                        case "eyr":
+                        case _codeExpireYear:
 
                             if (ValidateExpireYear(val))
                             {
@@ -58,7 +92,7 @@ namespace AdventOfCode.Year2020.Day04
                             }
 
                             break;
-                        case "hgt":
+                        case _codeHeight:
 
                             if (ValidateHeight(val))
                             {
@@ -66,7 +100,7 @@ namespace AdventOfCode.Year2020.Day04
                             }
 
                             break;
-                        case "hcl":
+                        case _codeHairColor:
 
                             if (ValidateHairColor(val))
                             {
@@ -74,7 +108,7 @@ namespace AdventOfCode.Year2020.Day04
                             }
 
                             break;
-                        case "ecl":
+                        case _codeEyeColor:
 
                             if (ValidateEyeColor(val))
                             {
@@ -82,7 +116,7 @@ namespace AdventOfCode.Year2020.Day04
                             }
 
                             break;
-                        case "pid":
+                        case _codePassportId:
 
                             if (ValidatePassportId(val))
                             {
@@ -106,14 +140,14 @@ namespace AdventOfCode.Year2020.Day04
 
         private bool IsValid(int count)
         {
-            return count >= 7;
+            return count >= _requiredValidParts;
         }
 
         private bool ValidateBirthYear(string value)
         {
             if (int.TryParse(value, out var year))
             {
-                return year >= 1920 && year <= 2002;
+                return year >= _minBirthYear && year <= _maxBirthYear;
             }
 
             return false;
@@ -123,7 +157,7 @@ namespace AdventOfCode.Year2020.Day04
         {
             if (int.TryParse(value, out var year))
             {
-                return year >= 2010 && year <= 2020;
+                return year >= _minIssueYear && year <= _maxIssueYear;
             }
 
             return false;
@@ -133,7 +167,7 @@ namespace AdventOfCode.Year2020.Day04
         {
             if (int.TryParse(value, out var year))
             {
-                return year >= 2020 && year <= 2030;
+                return year >= _minExpireYear && year <= _maxExpireYear;
             }
 
             return false;
@@ -141,24 +175,24 @@ namespace AdventOfCode.Year2020.Day04
 
         private bool ValidateHeight(string value)
         {
-            if (value.EndsWith("cm"))
+            if (value.EndsWith(_heightCmSuffix))
             {
                 var cmH = value.Remove(value.Length - 2, 2);
 
                 if (int.TryParse(cmH, out var cm))
                 {
-                    return cm >= 150 && cm <= 193;
+                    return cm >= _minHeightCm && cm <= _maxHeightCm;
                 }
 
                 return false;
             }
-            else if (value.EndsWith("in"))
+            else if (value.EndsWith(_heightInSuffix))
             {
                 var inH = value.Remove(value.Length - 2, 2);
 
                 if (int.TryParse(inH, out var inch))
                 {
-                    return inch >= 59 && inch <= 76;
+                    return inch >= _minHeightIn && inch <= _maxHeightIn;
                 }
 
                 return false;
@@ -171,11 +205,9 @@ namespace AdventOfCode.Year2020.Day04
 
         private bool ValidateHairColor(string value)
         {
-            if (value.Length == 7)
+            if (value.Length == _hairColorCodeLength)
             {
-                var rgx = new Regex(@"^#(?:[0-9a-fA-F]{3}){1,2}$");
-
-                return rgx.IsMatch(value);
+                return _hairColorRegex.IsMatch(value);
             }
 
             return false;
@@ -183,28 +215,19 @@ namespace AdventOfCode.Year2020.Day04
 
         private bool ValidateEyeColor(string value)
         {
-            switch (value)
+            if (_eyeColorOptions.Contains(value))
             {
-                case "amb":
-                case "blu":
-                case "brn":
-                case "gry":
-                case "grn":
-                case "hzl":
-                case "oth":
-                    return true;
-                default:
-                    return false;
+                return true;
             }
+
+            return false;
         }
 
         private bool ValidatePassportId(string value)
         {
-            if (value.Length == 9)
+            if (value.Length == _passportIdLength)
             {
-                var rgx = new Regex(@"^[0-9]{9}$");
-
-                return rgx.IsMatch(value);
+                return _passpordIdRegex.IsMatch(value);
             }
 
             return false;

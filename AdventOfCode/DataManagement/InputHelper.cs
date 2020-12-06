@@ -7,11 +7,13 @@ namespace AdventOfCode.DataManagement
 {
     public static class InputHelper
     {
-        private const string _fileName = "input.txt";
+        private const string _binPathMarker = "bin\\";
+        private const string _fileDirectoryPathTemplate = @"{0}\Year{1}\Day{2}\Data";
+        private const string _filePathTemplate = @"{0}\input.txt";
 
         public static async Task<string[]> GetPuzzleData(int year, string day)
         {
-            var dataPath = $@"{GetPuzzleDataFolderPath(year, day)}\{_fileName}";
+            var dataPath = string.Format(_filePathTemplate, GetPuzzleDataFolderPath(year, day));
 
             if (File.Exists(dataPath))
             {
@@ -24,9 +26,10 @@ namespace AdventOfCode.DataManagement
         public static string GetPuzzleDataFolderPath(int year, string day)
         {
             var assemblyLocation = Assembly.GetEntryAssembly().Location;
-            var rootDirPath = Path.GetDirectoryName(assemblyLocation.Substring(0, assemblyLocation.IndexOf("bin\\")));
+            var binPathIndex = assemblyLocation.IndexOf(_binPathMarker);
+            var directoryPath = assemblyLocation.Substring(0, binPathIndex);
 
-            return $@"{rootDirPath}\Year{year}\Day{day}\Data";
+            return string.Format(_fileDirectoryPathTemplate, Path.GetDirectoryName(directoryPath), year, day);
         }
     }
 }

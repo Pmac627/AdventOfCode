@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Folder Include="Year2020\Day04\Data\" />
+    <Folder Include="Year2020\Day06\Data\" />
   </ItemGroup>
 
 </Project>

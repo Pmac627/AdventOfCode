@@ -1,5 +1,6 @@
 ﻿using AdventOfCode.DataManagement;
 using AdventOfCode.DTO;
+using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -82,7 +83,17 @@ namespace AdventOfCode
 
                     break;
                 case '4':
-                    for (var d = _minDay; d <= _maxDay; d++)
+                    var maxDay = _maxDay;
+
+                    if (currentDate.Month == 12)
+                    {
+                        if (currentDate.Day < _maxDay)
+                        {
+                            maxDay = currentDate.Day;
+                        }
+                    }
+
+                    for (var d = _minDay; d <= maxDay; d++)
                     {
                         for (var y = _minYear; y <= _maxYear; y++)
                         {
@@ -208,16 +219,22 @@ namespace AdventOfCode
 
                             var resultProperty = asyncTask.GetType().GetProperty("Result");
                             var result = resultProperty.GetValue(asyncTask)?.ToString();
+                            var expectedValue = string.Empty;
+
+                            if (Attribute.GetCustomAttribute(type, typeof(ExpectedResultAttribute)) is ExpectedResultAttribute expectedResultAttribute)
+                            {
+                                Console.WriteLine($" Expected: {expectedResultAttribute.ExpectedValue}");
+                            }
 
                             if (copyToClipboard)
                             {
                                 await ClipboardService.SetTextAsync(result).ConfigureAwait(false);
 
-                                Console.WriteLine($" {result} (copied to clipboard)");
+                                Console.WriteLine($" Returned: {result} (copied to clipboard)");
                             }
                             else
                             {
-                                Console.WriteLine($" {result}");
+                                Console.WriteLine($" Returned: {result}");
                             }
                         }
                         else

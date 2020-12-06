@@ -1,22 +1,26 @@
-﻿using AdventOfCode.Interfaces;
-using System.Collections.Generic;
+﻿using AdventOfCode.DTO.Attributes;
+using AdventOfCode.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day04
 {
+	[ExpectedResult("192")]
     public class Task1 : IRunnableCode
     {
-        private static IList<string> _requiredCodes = new List<string>
-        {
-            "byr",
-            "iyr",
-            "eyr",
-            "hgt",
-            "hcl",
-            "ecl",
-            "pid"
-        };
+        private const int _requiredValidParts = 7;
+
+        private const char _codeDelimiter = ' ';
+
+        private const string _codeBirthYear = "byr";
+        private const string _codeIssueYear = "iyr";
+        private const string _codeExpireYear = "eyr";
+        private const string _codeHeight = "hgt";
+        private const string _codeHairColor = "hcl";
+        private const string _codeEyeColor = "ecl";
+        private const string _codePassportId = "pid";
+
+        private static readonly string[] _requiredCodes = new string[7] { _codeBirthYear, _codeIssueYear, _codeExpireYear, _codeHeight, _codeHairColor, _codeEyeColor, _codePassportId };
 
         public async Task<string> ExecuteAsync(string[] data)
         {
@@ -25,7 +29,7 @@ namespace AdventOfCode.Year2020.Day04
 
             foreach (var line in data)
             {
-                if (line == string.Empty)
+                if (string.IsNullOrWhiteSpace(line))
                 {
                     if (IsValid(partCounts))
                     {
@@ -37,12 +41,7 @@ namespace AdventOfCode.Year2020.Day04
                     continue;
                 }
 
-                var splitParts = line.Split(' ');
-
-                foreach (var code in _requiredCodes)
-                {
-                    partCounts += splitParts.Count(x => x.StartsWith(code));
-                }
+                partCounts += CountMatchingCodes(line.Split(_codeDelimiter));
             }
 
             if (IsValid(partCounts))
@@ -55,7 +54,19 @@ namespace AdventOfCode.Year2020.Day04
 
         private bool IsValid (int count)
         {
-            return count >= _requiredCodes.Count;
+            return count >= _requiredValidParts;
+        }
+
+        private int CountMatchingCodes(string[] codesProvided)
+        {
+            var matches = 0;
+
+            foreach (var code in _requiredCodes)
+            {
+                matches += codesProvided.Count(x => x.StartsWith(code));
+            }
+
+            return matches;
         }
     }
 }

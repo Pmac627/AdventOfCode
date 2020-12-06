@@ -1,11 +1,14 @@
-﻿using AdventOfCode.Interfaces;
-using System.Linq;
+﻿using AdventOfCode.DTO.Attributes;
+using AdventOfCode.Interfaces;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day03
 {
-    public class Task2 : IRunnableCode
+	[ExpectedResult("1206576000")]
+	public class Task2 : IRunnableCode
 	{
+		private const char _treeChar = '#';
+
 		public async Task<string> ExecuteAsync(string[] data)
 		{
 			var maxIndex = data[0].Length - 1;
@@ -19,16 +22,16 @@ namespace AdventOfCode.Year2020.Day03
 			return totalTrees.ToString();
 		}
 
-		private int CalculatePath(int right, int down, int maxLength, string[] data)
+		private static int CalculatePath(int right, int down, int maxLength, string[] data)
 		{
 			var totalTrees = 0;
 			var rightIndex = 0;
 
-			for (var i = 0; i < data.Count(); i += down)
+			for (var i = 0; i < data.Length; i += down)
             {
 				var lane = data[i].ToCharArray();
 
-				if (lane[rightIndex] == '#')
+				if (lane[rightIndex] == _treeChar)
 				{
 					++totalTrees;
 				}
@@ -37,7 +40,7 @@ namespace AdventOfCode.Year2020.Day03
 
 				if (rightIndex > maxLength)
 				{
-					rightIndex = rightIndex % lane.Length;
+					rightIndex %= lane.Length;
 				}
             }
 

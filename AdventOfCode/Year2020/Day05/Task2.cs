@@ -1,10 +1,12 @@
-﻿using AdventOfCode.Interfaces;
+﻿using AdventOfCode.DTO.Attributes;
+using AdventOfCode.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day05
 {
+	[ExpectedResult("562")]
     public class Task2 : IRunnableCode
     {
         private const int _minRow = 0;
