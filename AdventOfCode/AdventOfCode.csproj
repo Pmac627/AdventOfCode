@@ -9,4 +9,8 @@
     <PackageReference Include="TextCopy" Version="4.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Year2020\Day04\Data\" />
+  </ItemGroup>
+
 </Project>

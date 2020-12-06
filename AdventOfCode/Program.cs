@@ -1,7 +1,10 @@
-﻿using AdventOfCode.Interfaces;
+﻿using AdventOfCode.DataManagement;
+using AdventOfCode.DTO;
+using AdventOfCode.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using TextCopy;
@@ -10,8 +13,6 @@ namespace AdventOfCode
 {
     public class Program
     {
-        private const string _namespaceTemplate = "AdventOfCode.Year{0}.Day{1}.Task{2}";
-        private const string _puzzleNameTemplate = "Advent Of Code {0} || Day {1}, Puzzle {2}";
         private const int _minYear = /*2015*/2020; // Started in 2015, but until I add them, this is limited.
         private const int _maxYear = 2020;
         private const int _minDay = 1;
@@ -24,7 +25,7 @@ namespace AdventOfCode
 
         private static async Task Main(string[] args)
         {
-            var puzzles = new Dictionary<string, string>();
+            var puzzles = new List<Puzzle>();
 
             Console.WriteLine(@"  __   ____  _  _  ____  __ _  ____     __  ____  ");
             Console.WriteLine(@" / _\ (    \/ )( \(  __)(  ( \(_  _)   /  \(  __) ");
@@ -41,8 +42,8 @@ namespace AdventOfCode
             Console.WriteLine(" [0]  Enter Date & Puzzle (default)");
             Console.WriteLine(" [1]  Run Today, Puzzle 1");
             Console.WriteLine(" [2]  Run Today, Puzzle 2");
-            Console.WriteLine(" [3]  Run All");
-
+            Console.WriteLine(" [3]  Run Today, Both Puzzles");
+            Console.WriteLine(" [4]  Run All");
 
             Console.WriteLine();
             Console.Write(" Selection: ");
@@ -50,38 +51,44 @@ namespace AdventOfCode
 
             Console.WriteLine();
 
-            string dayString;
-            int year;
+            var puzzle1 = 1;
+            var puzzle2 = 2;
             var currentDate = DateTime.Now;
+
+            if (new char[3] { '1', '2', '3' }.Contains(option.KeyChar) &&
+                (
+                    (currentDate.Month != 12) || 
+                    currentDate.Year < _minYear || currentDate.Year > _maxYear ||
+                    currentDate.Day < _minDay || currentDate.Day > _maxDay
+                )
+            )
+            {
+                throw new ArgumentOutOfRangeException($" This option only works during the period of December 1st - 25th of valid years.");
+            }
 
             switch (option.KeyChar)
             {
                 case '1':
-                    var puzzle1 = 1;
+                    puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle1));
 
-                    year = currentDate.Year;
-                    dayString = (currentDate.Day < 10) ? $"0{currentDate.Day}" : currentDate.Day.ToString();
-
-                    puzzles.Add(string.Format(_namespaceTemplate, year, dayString, puzzle1), string.Format(_puzzleNameTemplate, year, dayString, puzzle1));
                     break;
                 case '2':
-                    var puzzle2 = 2;
+                    puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle2));
 
-                    year = currentDate.Year;
-                    dayString = (currentDate.Day < 10) ? $"0{currentDate.Day}" : currentDate.Day.ToString();
-
-                    puzzles.Add(string.Format(_namespaceTemplate, year, dayString, puzzle2), string.Format(_puzzleNameTemplate, year, dayString, puzzle2));
                     break;
                 case '3':
+                    puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle1));
+                    puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle2));
+
+                    break;
+                case '4':
                     for (var d = _minDay; d <= _maxDay; d++)
                     {
                         for (var y = _minYear; y <= _maxYear; y++)
                         {
                             for (var p = _minPuzzle; p <= _maxPuzzle; p++)
                             {
-                                dayString = (d < 10) ? $"0{d}" : d.ToString();
-
-                                puzzles.Add(string.Format(_namespaceTemplate, y, dayString, p), string.Format(_puzzleNameTemplate, y, dayString, p));
+                                puzzles.Add(new Puzzle(y, d, p));
                             }
                         }
                     }
@@ -89,17 +96,15 @@ namespace AdventOfCode
                     break;
                 case '0':
                 default:
-                    int day;
-
                     Console.Write(" Year: ");
                     var yearInput = Console.ReadLine();
 
-                    if (!int.TryParse(yearInput, out year))
+                    if (!int.TryParse(yearInput, out var year))
                     {
                         throw new ArgumentException($" Input year is invalid. Entered: {yearInput}");
                     }
 
-                    if (year < _minYear || year > 2020)
+                    if (year < _minYear || year > _maxYear)
                     {
                         throw new ArgumentOutOfRangeException($" Input year is invalid. Must be between {_minYear} and {_maxYear} (inclusive). Entered: {year}");
                     }
@@ -107,17 +112,15 @@ namespace AdventOfCode
                     Console.Write(" Day: ");
                     var dayInput = Console.ReadLine();
 
-                    if (!int.TryParse(dayInput, out day))
+                    if (!int.TryParse(dayInput, out var day))
                     {
                         throw new ArgumentException($" Input day is invalid. Entered: {dayInput}");
                     }
 
-                    if (day < 1 || day > 25)
+                    if (day < _minDay || day > _maxDay)
                     {
                         throw new ArgumentOutOfRangeException($" Input day is invalid. Must be between {_minDay} and {_maxDay} (inclusive). Entered: {day}");
                     }
-
-                    dayString = (day < 10) ? $"0{day}" : day.ToString();
 
                     Console.Write(" Puzzle: ");
                     var puzzleInput = Console.ReadLine();
@@ -127,24 +130,28 @@ namespace AdventOfCode
                         throw new ArgumentException($" Input puzzle number is invalid. Entered: {puzzleInput}");
                     }
 
-                    if (puzzle != 1 && puzzle != 2)
+                    if (puzzle != _minPuzzle && puzzle != _maxPuzzle)
                     {
                         throw new ArgumentOutOfRangeException($" Input puzzle number is invalid. Must be either {_minPuzzle} or {_maxPuzzle}. Entered: {puzzle}");
                     }
 
-                    puzzles.Add(string.Format(_namespaceTemplate, year, dayString, puzzle), string.Format(_puzzleNameTemplate, year, dayString, puzzle));
+                    puzzles.Add(new Puzzle(year, day, puzzle));
+
                     break;
             }
 
             var copyToClipboard = puzzles.Count == 1;
 
-            foreach (var pzl in puzzles)
+            foreach (var puzzle in puzzles)
             {
-                await ExecuteAsync(pzl.Key, pzl.Value, copyToClipboard).ConfigureAwait(false);
+                var data = await InputHelper.GetPuzzleData(puzzle.Year, puzzle.DayString).ConfigureAwait(false);
+
+                await ExecuteAsync(puzzle.PuzzleNameSpace, puzzle.PuzzleName, data, copyToClipboard).ConfigureAwait(false);
             }
 
             Console.WriteLine();
             Console.WriteLine(" Would you like to run another puzzle (y/n)?");
+            Console.WriteLine();
             Console.Write(" Selection: ");
             var runAgain = Console.ReadKey();
 
@@ -177,7 +184,7 @@ namespace AdventOfCode
             }
         }
 
-        private static async Task ExecuteAsync(string namespaceString, string puzzleName, bool copyToClipboard = false)
+        private static async Task ExecuteAsync(string namespaceString, string puzzleName, string[] data, bool copyToClipboard = false)
         {
             try
             {
@@ -189,25 +196,33 @@ namespace AdventOfCode
                     {
                         Console.WriteLine();
                         Console.WriteLine($" {new string('-', _horizontalRuleLength)}");
-                        Console.WriteLine($" Running {puzzleName}");
+                        Console.WriteLine($"  Running {puzzleName}");
                         Console.WriteLine($" {new string('-', _horizontalRuleLength)}");
                         Console.WriteLine();
 
-                        var asyncTask = (Task)type.GetMethod("ExecuteAsync").Invoke(runnableCode, null);
-
-                        await asyncTask.ConfigureAwait(false);
-
-                        var resultProperty = asyncTask.GetType().GetProperty("Result");
-                        var result = resultProperty.GetValue(asyncTask)?.ToString();
-
-                        if (copyToClipboard)
+                        if (data != null && data.Any())
                         {
-                            await ClipboardService.SetTextAsync(result).ConfigureAwait(false);
-                            Console.WriteLine($" {result} (copied to clipboard)");
+                            var asyncTask = (Task)type.GetMethod("ExecuteAsync").Invoke(runnableCode, new object[1] { data });
+
+                            await asyncTask.ConfigureAwait(false);
+
+                            var resultProperty = asyncTask.GetType().GetProperty("Result");
+                            var result = resultProperty.GetValue(asyncTask)?.ToString();
+
+                            if (copyToClipboard)
+                            {
+                                await ClipboardService.SetTextAsync(result).ConfigureAwait(false);
+
+                                Console.WriteLine($" {result} (copied to clipboard)");
+                            }
+                            else
+                            {
+                                Console.WriteLine($" {result}");
+                            }
                         }
                         else
                         {
-                            Console.WriteLine($" {result}");
+                            Console.WriteLine(" No data available. Skipping execution.");
                         }
                     }
                     else

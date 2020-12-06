@@ -7,7 +7,7 @@ namespace AdventOfCode.Year2020.Day16
 {
     public class Task1 : IRunnableCode
     {
-        public async Task<string> ExecuteAsync()
+        public async Task<string> ExecuteAsync(string[] data)
         {
             throw new NotImplementedException();
         }

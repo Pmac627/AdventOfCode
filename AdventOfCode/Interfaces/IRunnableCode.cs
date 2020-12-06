@@ -4,6 +4,6 @@ namespace AdventOfCode.Interfaces
 {
     interface IRunnableCode
     {
-        Task<string> ExecuteAsync();
+        Task<string> ExecuteAsync(string[] data);
     }
 }
