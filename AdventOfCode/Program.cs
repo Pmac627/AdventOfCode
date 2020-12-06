@@ -21,6 +21,28 @@ namespace AdventOfCode
         private const int _minPuzzle = 1;
         private const int _maxPuzzle = 2;
         private const int _horizontalRuleLength = 50;
+        private const int _validCurrentMonth = 12;
+        private const int _exitPauseInSeconds = 1;
+        private const int _gracefulExitCode = 0;
+
+        private const char _validInput0 = '0';
+        private const char _validInput1 = '1';
+        private const char _validInput2 = '2';
+        private const char _validInput3 = '3';
+        private const char _validInput4 = '4';
+        private const char _validInput5 = '5';
+        private const char _validNextStepLowerY = 'y';
+        private const char _validNextStepUpperY = 'Y';
+        private const char _validNextStepLowerN = 'n';
+        private const char _validNextStepUpperN = 'N';
+        private const char _repeatedCharHorizontalRule = '-';
+        private const char _repeatedCharError = '*';
+
+        private const ConsoleColor _defaultFontColor = ConsoleColor.Gray;
+        private const ConsoleColor _errorFontColor = ConsoleColor.Red;
+        private const ConsoleColor _inputFontColor = ConsoleColor.DarkYellow;
+        private const ConsoleColor _resultFontColor = ConsoleColor.Cyan;
+        private const ConsoleColor _expectedResultFontColor = ConsoleColor.Green;
 
         private static readonly Assembly _thisAssembly = typeof(Program).Assembly;
 
@@ -48,28 +70,28 @@ namespace AdventOfCode
 
             switch (option.KeyChar)
             {
-                case '1':
+                case _validInput1:
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle1));
 
                     break;
-                case '2':
+                case _validInput2:
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle2));
 
                     break;
-                case '3':
+                case _validInput3:
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle1));
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle2));
 
                     break;
-                case '4':
+                case _validInput4:
                     puzzles.AddRange(CreateListOfAllPuzzles(currentDate));
 
                     break;
-                case '5':
+                case _validInput5:
                     GenerateExitMessage();
 
                     break;
-                case '0':
+                case _validInput0:
                 default:
                     puzzles.Add(GenerateManualRunMenu());
 
@@ -81,9 +103,27 @@ namespace AdventOfCode
             await GenerateRerunMenu().ConfigureAwait(false);
         }
 
+        private static ConsoleKeyInfo GetKeyInput()
+        {
+            Console.ForegroundColor = _inputFontColor;
+            var option = Console.ReadKey();
+            Console.ForegroundColor = _defaultFontColor;
+
+            return option;
+        }
+
+        private static string GetLineInput()
+        {
+            Console.ForegroundColor = _inputFontColor;
+            var line = Console.ReadLine();
+            Console.ForegroundColor = _defaultFontColor;
+
+            return line;
+        }
+
         private static void GenerateLogo()
         {
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = _resultFontColor;
             Console.WriteLine(@"  __   ____  _  _  ____  __ _  ____     __  ____  ");
             Console.WriteLine(@" / _\ (    \/ )( \(  __)(  ( \(_  _)   /  \(  __) ");
             Console.WriteLine(@"/    \ ) D (\ \/ / ) _) /    /  )(    (  O )) _)  ");
@@ -93,25 +133,23 @@ namespace AdventOfCode
             Console.WriteLine(@"( (__(  O )) D ( ) _)  _    / __/(  0 )/ __/(  0 )");
             Console.WriteLine(@" \___)\__/(____/(____)(_)  (____) \__/(____) \__/ ");
             Console.WriteLine(@"                                                  ");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.ForegroundColor = _defaultFontColor;
         }
 
         private static ConsoleKeyInfo GenerateMenu()
         {
             Console.WriteLine(" Welcome! Please choose an option:");
             Console.WriteLine();
-            Console.WriteLine(" [0]  Enter Date & Puzzle (default)");
-            Console.WriteLine(" [1]  Run Today, Puzzle 1");
-            Console.WriteLine(" [2]  Run Today, Puzzle 2");
-            Console.WriteLine(" [3]  Run Today, Both Puzzles");
-            Console.WriteLine(" [4]  Run All");
-            Console.WriteLine(" [5]  Exit");
+            Console.WriteLine($" [{_validInput0}]  Enter Date & Puzzle (default)");
+            Console.WriteLine($" [{_validInput1}]  Run Today, Puzzle 1");
+            Console.WriteLine($" [{_validInput2}]  Run Today, Puzzle 2");
+            Console.WriteLine($" [{_validInput3}]  Run Today, Both Puzzles");
+            Console.WriteLine($" [{_validInput4}]  Run All");
+            Console.WriteLine($" [{_validInput5}]  Exit");
 
             Console.WriteLine();
             Console.Write(" Selection: ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            var option = Console.ReadKey();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            var option = GetKeyInput();
 
             Console.WriteLine();
 
@@ -120,15 +158,15 @@ namespace AdventOfCode
 
         private static void ValidateRunTodayIsAllowed(DateTime currentDate, char selectedOption)
         {
-            if (new char[3] { '1', '2', '3' }.Contains(selectedOption) &&
+            if (new char[3] { _validInput1, _validInput2, _validInput3 }.Contains(selectedOption) &&
                 (
-                    (currentDate.Month != 12) ||
+                    (currentDate.Month != _validCurrentMonth) ||
                     currentDate.Year < _minYear || currentDate.Year > _maxYear ||
                     currentDate.Day < _minDay || currentDate.Day > _maxDay
                 )
             )
             {
-                throw new ArgumentOutOfRangeException($" This option only works during the period of December 1st - 25th of valid years.");
+                throw new ArgumentOutOfRangeException($" This option only works during the period of December {_minDay}st - {_maxDay}th of valid years.");
             }
         }
 
@@ -137,7 +175,7 @@ namespace AdventOfCode
             var puzzles = new List<Puzzle>();
             var maxDay = _maxDay;
 
-            if (currentDate.Month == 12)
+            if (currentDate.Month == _validCurrentMonth)
             {
                 if (currentDate.Day < _maxDay)
                 {
@@ -162,9 +200,7 @@ namespace AdventOfCode
         private static Puzzle GenerateManualRunMenu()
         {
             Console.Write(" Year: ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            var yearInput = Console.ReadLine();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            var yearInput = GetLineInput();
 
             if (!int.TryParse(yearInput, out var year))
             {
@@ -177,9 +213,7 @@ namespace AdventOfCode
             }
 
             Console.Write(" Day: ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            var dayInput = Console.ReadLine();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            var dayInput = GetLineInput();
 
             if (!int.TryParse(dayInput, out var day))
             {
@@ -192,9 +226,7 @@ namespace AdventOfCode
             }
 
             Console.Write(" Puzzle: ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            var puzzleInput = Console.ReadLine();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            var puzzleInput = GetLineInput();
 
             if (!int.TryParse(puzzleInput, out var puzzle))
             {
@@ -232,9 +264,9 @@ namespace AdventOfCode
                     if (Activator.CreateInstance(type, null) is IRunnableCode runnableCode)
                     {
                         Console.WriteLine();
-                        Console.WriteLine($" {new string('-', _horizontalRuleLength)}");
+                        Console.WriteLine($" {new string(_repeatedCharHorizontalRule, _horizontalRuleLength)}");
                         Console.WriteLine($"  Running {puzzleName}");
-                        Console.WriteLine($" {new string('-', _horizontalRuleLength)}");
+                        Console.WriteLine($" {new string(_repeatedCharHorizontalRule, _horizontalRuleLength)}");
                         Console.WriteLine();
 
                         if (data != null && data.Any())
@@ -249,11 +281,23 @@ namespace AdventOfCode
 
                             if (Attribute.GetCustomAttribute(type, typeof(ExpectedResultAttribute)) is ExpectedResultAttribute expectedResultAttribute)
                             {
-                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.ForegroundColor = _expectedResultFontColor;
                                 Console.WriteLine($" Expected: {expectedResultAttribute.ExpectedValue}");
+
+                                if (expectedResultAttribute.ExpectedValue != result)
+                                {
+                                    Console.ForegroundColor = _errorFontColor;
+                                }
+                                else
+                                {
+                                    Console.ForegroundColor = _resultFontColor;
+                                }
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = _resultFontColor;
                             }
 
-                            Console.ForegroundColor = ConsoleColor.Cyan;
                             if (copyToClipboard)
                             {
                                 await ClipboardService.SetTextAsync(result).ConfigureAwait(false);
@@ -264,38 +308,38 @@ namespace AdventOfCode
                             {
                                 Console.WriteLine($" Returned: {result}");
                             }
-                            Console.ForegroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = _defaultFontColor;
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.ForegroundColor = _errorFontColor;
                             Console.WriteLine(" No data available. Skipping execution.");
-                            Console.ForegroundColor = ConsoleColor.Gray;
+                            Console.ForegroundColor = _defaultFontColor;
                         }
                     }
                     else
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine($"{puzzleName} does not implement {nameof(IRunnableCode)}. Ensure namespace {namespaceString} implements {nameof(IRunnableCode)} in the codebase and retry.");
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Console.ForegroundColor = _errorFontColor;
+                        Console.WriteLine($" {puzzleName} does not implement {nameof(IRunnableCode)}. Ensure namespace {namespaceString} implements {nameof(IRunnableCode)} in the codebase and retry.");
+                        Console.ForegroundColor = _defaultFontColor;
                     }
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine($"{puzzleName} does not exist. Ensure namespace {namespaceString} exists in the codebase and retry.");
-                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.ForegroundColor = _errorFontColor;
+                    Console.WriteLine($" {puzzleName} does not exist. Ensure namespace {namespaceString} exists in the codebase and retry.");
+                    Console.ForegroundColor = _defaultFontColor;
                 }
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.ForegroundColor = _errorFontColor;
                 Console.WriteLine();
-                Console.WriteLine($" {new string('*', _horizontalRuleLength)}");
+                Console.WriteLine($" {new string(_repeatedCharError, _horizontalRuleLength)}");
                 Console.WriteLine(" ERROR");
-                Console.WriteLine($" {new string('*', _horizontalRuleLength)}");
+                Console.WriteLine($" {new string(_repeatedCharError, _horizontalRuleLength)}");
                 Console.WriteLine($" {ex.GetBaseException().Message}");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.ForegroundColor = _defaultFontColor;
             }
         }
 
@@ -305,29 +349,27 @@ namespace AdventOfCode
             Console.WriteLine(" Would you like to run another puzzle (y/n)?");
             Console.WriteLine();
             Console.Write(" Selection: ");
-            Console.ForegroundColor = ConsoleColor.Red;
-            var runAgain = Console.ReadKey();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            var runAgain = GetKeyInput();
             Console.WriteLine();
 
             switch (runAgain.KeyChar)
             {
-                case 'y':
-                case 'Y':
+                case _validNextStepLowerY:
+                case _validNextStepUpperY:
                     Console.WriteLine();
                     Console.WriteLine(" Press any key to reload.");
-                    Console.ReadKey();
+                    GetKeyInput();
 
                     Console.WriteLine();
                     Console.WriteLine();
 
                     return Run(true);
-                case 'n':
-                case 'N':
+                case _validNextStepLowerN:
+                case _validNextStepUpperN:
                 default:
                     Console.WriteLine();
                     Console.WriteLine(" Press any key to exit.");
-                    Console.ReadKey();
+                    GetKeyInput();
 
                     break;
             }
@@ -338,12 +380,12 @@ namespace AdventOfCode
         private static void GenerateExitMessage()
         {
             Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("Goodbye!");
-            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.ForegroundColor = _resultFontColor;
+            Console.WriteLine(" Goodbye!");
+            Console.ForegroundColor = _defaultFontColor;
 
-            Thread.Sleep(TimeSpan.FromSeconds(1));
-            Environment.Exit(0);
+            Thread.Sleep(TimeSpan.FromSeconds(_exitPauseInSeconds));
+            Environment.Exit(_gracefulExitCode);
         }
     }
 }
