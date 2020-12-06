@@ -12,7 +12,7 @@ using TextCopy;
 
 namespace AdventOfCode
 {
-    public class Program
+    public class Runner
     {
         private const int _minYear = /*2015*/2020; // Started in 2015, but until I add them, this is limited.
         private const int _maxYear = 2020;
@@ -44,7 +44,7 @@ namespace AdventOfCode
         private const ConsoleColor _resultFontColor = ConsoleColor.Cyan;
         private const ConsoleColor _expectedResultFontColor = ConsoleColor.Green;
 
-        private static readonly Assembly _thisAssembly = typeof(Program).Assembly;
+        private static readonly Assembly _thisAssembly = typeof(Runner).Assembly;
 
         private static async Task Main(string[] _)
         {

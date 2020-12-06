@@ -14,4 +14,8 @@
     <Folder Include="Year2020\Day06\Data\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>
