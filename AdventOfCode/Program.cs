@@ -4,9 +4,9 @@ using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using TextCopy;
 
@@ -24,48 +24,27 @@ namespace AdventOfCode
 
         private static readonly Assembly _thisAssembly = typeof(Program).Assembly;
 
-        private static async Task Main(string[] args)
+        private static async Task Main(string[] _)
         {
-            var puzzles = new List<Puzzle>();
+            await Run().ConfigureAwait(false);
+        }
 
-            Console.WriteLine(@"  __   ____  _  _  ____  __ _  ____     __  ____  ");
-            Console.WriteLine(@" / _\ (    \/ )( \(  __)(  ( \(_  _)   /  \(  __) ");
-            Console.WriteLine(@"/    \ ) D (\ \/ / ) _) /    /  )(    (  O )) _)  ");
-            Console.WriteLine(@"\_/\_/(____/ \__/ (____)\_)__) (__)    \__/(__)   ");
-            Console.WriteLine(@"  ___  __  ____  ____  _    ____   __  ____   __  ");
-            Console.WriteLine(@" / __)/  \(    \(  __)(_)  (___ \ /  \(___ \ /  \ ");
-            Console.WriteLine(@"( (__(  O )) D ( ) _)  _    / __/(  0 )/ __/(  0 )");
-            Console.WriteLine(@" \___)\__/(____/(____)(_)  (____) \__/(____) \__/ ");
-            Console.WriteLine(@"                                                  ");
+        private static async Task Run(bool isRerun = false)
+        {
+            if (!isRerun)
+            {
+                GenerateLogo();
+            }
 
-            Console.WriteLine(" Welcome! Please choose an option:");
-            Console.WriteLine();
-            Console.WriteLine(" [0]  Enter Date & Puzzle (default)");
-            Console.WriteLine(" [1]  Run Today, Puzzle 1");
-            Console.WriteLine(" [2]  Run Today, Puzzle 2");
-            Console.WriteLine(" [3]  Run Today, Both Puzzles");
-            Console.WriteLine(" [4]  Run All");
+            var option = GenerateMenu();
 
-            Console.WriteLine();
-            Console.Write(" Selection: ");
-            var option = Console.ReadKey();
-
-            Console.WriteLine();
-
-            var puzzle1 = 1;
-            var puzzle2 = 2;
             var currentDate = DateTime.Now;
 
-            if (new char[3] { '1', '2', '3' }.Contains(option.KeyChar) &&
-                (
-                    (currentDate.Month != 12) || 
-                    currentDate.Year < _minYear || currentDate.Year > _maxYear ||
-                    currentDate.Day < _minDay || currentDate.Day > _maxDay
-                )
-            )
-            {
-                throw new ArgumentOutOfRangeException($" This option only works during the period of December 1st - 25th of valid years.");
-            }
+            ValidateRunTodayIsAllowed(currentDate, option.KeyChar);
+            
+            var puzzles = new List<Puzzle>();
+            var puzzle1 = 1;
+            var puzzle2 = 2;
 
             switch (option.KeyChar)
             {
@@ -83,74 +62,155 @@ namespace AdventOfCode
 
                     break;
                 case '4':
-                    var maxDay = _maxDay;
+                    puzzles.AddRange(CreateListOfAllPuzzles(currentDate));
 
-                    if (currentDate.Month == 12)
-                    {
-                        if (currentDate.Day < _maxDay)
-                        {
-                            maxDay = currentDate.Day;
-                        }
-                    }
-
-                    for (var d = _minDay; d <= maxDay; d++)
-                    {
-                        for (var y = _minYear; y <= _maxYear; y++)
-                        {
-                            for (var p = _minPuzzle; p <= _maxPuzzle; p++)
-                            {
-                                puzzles.Add(new Puzzle(y, d, p));
-                            }
-                        }
-                    }
+                    break;
+                case '5':
+                    GenerateExitMessage();
 
                     break;
                 case '0':
                 default:
-                    Console.Write(" Year: ");
-                    var yearInput = Console.ReadLine();
-
-                    if (!int.TryParse(yearInput, out var year))
-                    {
-                        throw new ArgumentException($" Input year is invalid. Entered: {yearInput}");
-                    }
-
-                    if (year < _minYear || year > _maxYear)
-                    {
-                        throw new ArgumentOutOfRangeException($" Input year is invalid. Must be between {_minYear} and {_maxYear} (inclusive). Entered: {year}");
-                    }
-
-                    Console.Write(" Day: ");
-                    var dayInput = Console.ReadLine();
-
-                    if (!int.TryParse(dayInput, out var day))
-                    {
-                        throw new ArgumentException($" Input day is invalid. Entered: {dayInput}");
-                    }
-
-                    if (day < _minDay || day > _maxDay)
-                    {
-                        throw new ArgumentOutOfRangeException($" Input day is invalid. Must be between {_minDay} and {_maxDay} (inclusive). Entered: {day}");
-                    }
-
-                    Console.Write(" Puzzle: ");
-                    var puzzleInput = Console.ReadLine();
-
-                    if (!int.TryParse(puzzleInput, out var puzzle))
-                    {
-                        throw new ArgumentException($" Input puzzle number is invalid. Entered: {puzzleInput}");
-                    }
-
-                    if (puzzle != _minPuzzle && puzzle != _maxPuzzle)
-                    {
-                        throw new ArgumentOutOfRangeException($" Input puzzle number is invalid. Must be either {_minPuzzle} or {_maxPuzzle}. Entered: {puzzle}");
-                    }
-
-                    puzzles.Add(new Puzzle(year, day, puzzle));
+                    puzzles.Add(GenerateManualRunMenu());
 
                     break;
             }
 
+            await ExecutePuzzleList(puzzles).ConfigureAwait(false);
+
+            await GenerateRerunMenu().ConfigureAwait(false);
+        }
+
+        private static void GenerateLogo()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"  __   ____  _  _  ____  __ _  ____     __  ____  ");
+            Console.WriteLine(@" / _\ (    \/ )( \(  __)(  ( \(_  _)   /  \(  __) ");
+            Console.WriteLine(@"/    \ ) D (\ \/ / ) _) /    /  )(    (  O )) _)  ");
+            Console.WriteLine(@"\_/\_/(____/ \__/ (____)\_)__) (__)    \__/(__)   ");
+            Console.WriteLine(@"  ___  __  ____  ____  _    ____   __  ____   __  ");
+            Console.WriteLine(@" / __)/  \(    \(  __)(_)  (___ \ /  \(___ \ /  \ ");
+            Console.WriteLine(@"( (__(  O )) D ( ) _)  _    / __/(  0 )/ __/(  0 )");
+            Console.WriteLine(@" \___)\__/(____/(____)(_)  (____) \__/(____) \__/ ");
+            Console.WriteLine(@"                                                  ");
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
+        private static ConsoleKeyInfo GenerateMenu()
+        {
+            Console.WriteLine(" Welcome! Please choose an option:");
+            Console.WriteLine();
+            Console.WriteLine(" [0]  Enter Date & Puzzle (default)");
+            Console.WriteLine(" [1]  Run Today, Puzzle 1");
+            Console.WriteLine(" [2]  Run Today, Puzzle 2");
+            Console.WriteLine(" [3]  Run Today, Both Puzzles");
+            Console.WriteLine(" [4]  Run All");
+            Console.WriteLine(" [5]  Exit");
+
+            Console.WriteLine();
+            Console.Write(" Selection: ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            var option = Console.ReadKey();
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            Console.WriteLine();
+
+            return option;
+        }
+
+        private static void ValidateRunTodayIsAllowed(DateTime currentDate, char selectedOption)
+        {
+            if (new char[3] { '1', '2', '3' }.Contains(selectedOption) &&
+                (
+                    (currentDate.Month != 12) ||
+                    currentDate.Year < _minYear || currentDate.Year > _maxYear ||
+                    currentDate.Day < _minDay || currentDate.Day > _maxDay
+                )
+            )
+            {
+                throw new ArgumentOutOfRangeException($" This option only works during the period of December 1st - 25th of valid years.");
+            }
+        }
+
+        private static IList<Puzzle> CreateListOfAllPuzzles(DateTime currentDate)
+        {
+            var puzzles = new List<Puzzle>();
+            var maxDay = _maxDay;
+
+            if (currentDate.Month == 12)
+            {
+                if (currentDate.Day < _maxDay)
+                {
+                    maxDay = currentDate.Day;
+                }
+            }
+
+            for (var d = _minDay; d <= maxDay; d++)
+            {
+                for (var y = _minYear; y <= _maxYear; y++)
+                {
+                    for (var p = _minPuzzle; p <= _maxPuzzle; p++)
+                    {
+                        puzzles.Add(new Puzzle(y, d, p));
+                    }
+                }
+            }
+
+            return puzzles;
+        }
+
+        private static Puzzle GenerateManualRunMenu()
+        {
+            Console.Write(" Year: ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            var yearInput = Console.ReadLine();
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            if (!int.TryParse(yearInput, out var year))
+            {
+                throw new ArgumentException($" Input year is invalid. Entered: {yearInput}");
+            }
+
+            if (year < _minYear || year > _maxYear)
+            {
+                throw new ArgumentOutOfRangeException($" Input year is invalid. Must be between {_minYear} and {_maxYear} (inclusive). Entered: {year}");
+            }
+
+            Console.Write(" Day: ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            var dayInput = Console.ReadLine();
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            if (!int.TryParse(dayInput, out var day))
+            {
+                throw new ArgumentException($" Input day is invalid. Entered: {dayInput}");
+            }
+
+            if (day < _minDay || day > _maxDay)
+            {
+                throw new ArgumentOutOfRangeException($" Input day is invalid. Must be between {_minDay} and {_maxDay} (inclusive). Entered: {day}");
+            }
+
+            Console.Write(" Puzzle: ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            var puzzleInput = Console.ReadLine();
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            if (!int.TryParse(puzzleInput, out var puzzle))
+            {
+                throw new ArgumentException($" Input puzzle number is invalid. Entered: {puzzleInput}");
+            }
+
+            if (puzzle != _minPuzzle && puzzle != _maxPuzzle)
+            {
+                throw new ArgumentOutOfRangeException($" Input puzzle number is invalid. Must be either {_minPuzzle} or {_maxPuzzle}. Entered: {puzzle}");
+            }
+
+            return new Puzzle(year, day, puzzle);
+        }
+
+        private static async Task ExecutePuzzleList(IList<Puzzle> puzzles)
+        {
             var copyToClipboard = puzzles.Count == 1;
 
             foreach (var puzzle in puzzles)
@@ -158,40 +218,6 @@ namespace AdventOfCode
                 var data = await InputHelper.GetPuzzleData(puzzle.Year, puzzle.DayString).ConfigureAwait(false);
 
                 await ExecuteAsync(puzzle.PuzzleNameSpace, puzzle.PuzzleName, data, copyToClipboard).ConfigureAwait(false);
-            }
-
-            Console.WriteLine();
-            Console.WriteLine(" Would you like to run another puzzle (y/n)?");
-            Console.WriteLine();
-            Console.Write(" Selection: ");
-            var runAgain = Console.ReadKey();
-
-            switch (runAgain.KeyChar)
-            {
-                case 'y':
-                case 'Y':
-                    Console.WriteLine();
-                    Console.WriteLine(" Press any key to reload.");
-                    Console.ReadKey();
-
-                    Console.WriteLine();
-                    Console.WriteLine();
-
-                    // Starts a new instance of the program itself
-                    Process.Start(AppDomain.CurrentDomain.FriendlyName);
-
-                    // Closes the current process
-                    Environment.Exit(0);
-
-                    break;
-                case 'n':
-                case 'N':
-                default:
-                    Console.WriteLine();
-                    Console.WriteLine(" Press any key to exit.");
-                    Console.ReadKey();
-
-                    break;
             }
         }
 
@@ -223,9 +249,11 @@ namespace AdventOfCode
 
                             if (Attribute.GetCustomAttribute(type, typeof(ExpectedResultAttribute)) is ExpectedResultAttribute expectedResultAttribute)
                             {
+                                Console.ForegroundColor = ConsoleColor.Green;
                                 Console.WriteLine($" Expected: {expectedResultAttribute.ExpectedValue}");
                             }
 
+                            Console.ForegroundColor = ConsoleColor.Cyan;
                             if (copyToClipboard)
                             {
                                 await ClipboardService.SetTextAsync(result).ConfigureAwait(false);
@@ -236,30 +264,86 @@ namespace AdventOfCode
                             {
                                 Console.WriteLine($" Returned: {result}");
                             }
+                            Console.ForegroundColor = ConsoleColor.Gray;
                         }
                         else
                         {
+                            Console.ForegroundColor = ConsoleColor.DarkYellow;
                             Console.WriteLine(" No data available. Skipping execution.");
+                            Console.ForegroundColor = ConsoleColor.Gray;
                         }
                     }
                     else
                     {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.WriteLine($"{puzzleName} does not implement {nameof(IRunnableCode)}. Ensure namespace {namespaceString} implements {nameof(IRunnableCode)} in the codebase and retry.");
+                        Console.ForegroundColor = ConsoleColor.Gray;
                     }
                 }
                 else
                 {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
                     Console.WriteLine($"{puzzleName} does not exist. Ensure namespace {namespaceString} exists in the codebase and retry.");
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
             }
             catch (Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine();
                 Console.WriteLine($" {new string('*', _horizontalRuleLength)}");
                 Console.WriteLine(" ERROR");
                 Console.WriteLine($" {new string('*', _horizontalRuleLength)}");
                 Console.WriteLine($" {ex.GetBaseException().Message}");
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
+        }
+
+        private static Task GenerateRerunMenu()
+        {
+            Console.WriteLine();
+            Console.WriteLine(" Would you like to run another puzzle (y/n)?");
+            Console.WriteLine();
+            Console.Write(" Selection: ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            var runAgain = Console.ReadKey();
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine();
+
+            switch (runAgain.KeyChar)
+            {
+                case 'y':
+                case 'Y':
+                    Console.WriteLine();
+                    Console.WriteLine(" Press any key to reload.");
+                    Console.ReadKey();
+
+                    Console.WriteLine();
+                    Console.WriteLine();
+
+                    return Run(true);
+                case 'n':
+                case 'N':
+                default:
+                    Console.WriteLine();
+                    Console.WriteLine(" Press any key to exit.");
+                    Console.ReadKey();
+
+                    break;
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private static void GenerateExitMessage()
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("Goodbye!");
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+            Environment.Exit(0);
         }
     }
 }
