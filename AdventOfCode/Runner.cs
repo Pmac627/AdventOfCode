@@ -4,6 +4,7 @@ using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -40,9 +41,10 @@ namespace AdventOfCode
 
         private const ConsoleColor _defaultFontColor = ConsoleColor.Gray;
         private const ConsoleColor _errorFontColor = ConsoleColor.Red;
-        private const ConsoleColor _inputFontColor = ConsoleColor.DarkYellow;
-        private const ConsoleColor _resultFontColor = ConsoleColor.Cyan;
+        private const ConsoleColor _inputFontColor = ConsoleColor.DarkGreen;
+        private const ConsoleColor _resultFontColor = ConsoleColor.DarkCyan;
         private const ConsoleColor _expectedResultFontColor = ConsoleColor.Green;
+        private const ConsoleColor _timerReadoutFontColor = ConsoleColor.DarkYellow;
 
         private static readonly Assembly _thisAssembly = typeof(Runner).Assembly;
 
@@ -247,13 +249,16 @@ namespace AdventOfCode
 
             foreach (var puzzle in puzzles)
             {
+                var stopWatch = Stopwatch.StartNew();
                 var data = await InputHelper.GetPuzzleData(puzzle.Year, puzzle.DayString).ConfigureAwait(false);
+                stopWatch.Stop();
+                var dataReadInMs = stopWatch.ElapsedMilliseconds;
 
-                await ExecuteAsync(puzzle.PuzzleNameSpace, puzzle.PuzzleName, data, copyToClipboard).ConfigureAwait(false);
+                await ExecuteAsync(puzzle.PuzzleNameSpace, puzzle.PuzzleName, data, dataReadInMs, copyToClipboard).ConfigureAwait(false);
             }
         }
 
-        private static async Task ExecuteAsync(string namespaceString, string puzzleName, string[] data, bool copyToClipboard = false)
+        private static async Task ExecuteAsync(string namespaceString, string puzzleName, string[] data, long dataReadInMs, bool copyToClipboard = false)
         {
             try
             {
@@ -266,14 +271,22 @@ namespace AdventOfCode
                         Console.WriteLine();
                         Console.WriteLine($" {new string(_repeatedCharHorizontalRule, _horizontalRuleLength)}");
                         Console.WriteLine($"  Running {puzzleName}");
+                        Console.ForegroundColor = _timerReadoutFontColor;
+                        Console.WriteLine($"  Data Readtime: {dataReadInMs}ms || Lines: {data.Length}");
+                        Console.ForegroundColor = _defaultFontColor;
                         Console.WriteLine($" {new string(_repeatedCharHorizontalRule, _horizontalRuleLength)}");
                         Console.WriteLine();
 
                         if (data != null && data.Any())
                         {
+                            var stopWatch = Stopwatch.StartNew();
+
                             var asyncTask = (Task)type.GetMethod("ExecuteAsync").Invoke(runnableCode, new object[1] { data });
 
                             await asyncTask.ConfigureAwait(false);
+
+                            stopWatch.Stop();
+                            var runTimeInMs = stopWatch.ElapsedMilliseconds;
 
                             var resultProperty = asyncTask.GetType().GetProperty("Result");
                             var result = resultProperty.GetValue(asyncTask)?.ToString();
@@ -308,6 +321,9 @@ namespace AdventOfCode
                             {
                                 Console.WriteLine($" Returned: {result}");
                             }
+
+                            Console.ForegroundColor = _timerReadoutFontColor;
+                            Console.WriteLine($" Run time: {runTimeInMs}ms");
                             Console.ForegroundColor = _defaultFontColor;
                         }
                         else
