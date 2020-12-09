@@ -383,9 +383,7 @@ namespace AdventOfCode
                 case _validNextStepLowerN:
                 case _validNextStepUpperN:
                 default:
-                    Console.WriteLine();
-                    Console.WriteLine(" Press any key to exit.");
-                    GetKeyInput();
+                    GenerateExitMessage();
 
                     break;
             }
