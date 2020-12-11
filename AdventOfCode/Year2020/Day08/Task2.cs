@@ -18,11 +18,7 @@ namespace AdventOfCode.Year2020.Day08
 
         public async Task<string> ExecuteAsync(string[] data)
         {
-            var instructions = data.Select(x =>
-            {
-                var parts = x.Split(_instructionPartDelimiter);
-                return new Instruction(parts[0], parts[1]);
-            }).ToList();
+            var instructions = data.Select(x => new Instruction(x, _instructionPartDelimiter)).ToList();
 
             _ = RunProgram(instructions, out var accumulator);
 

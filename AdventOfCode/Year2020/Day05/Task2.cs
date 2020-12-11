@@ -1,12 +1,13 @@
-﻿using AdventOfCode.DTO.Attributes;
+﻿using AdventOfCode.DataManagement;
+using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using static AdventOfCode.DTO.Enums;
 
 namespace AdventOfCode.Year2020.Day05
 {
-	[ExpectedResult("562")]
+    [ExpectedResult("562")]
     public class Task2 : IRunnableCode
     {
         private const int _minRow = 0;
@@ -30,7 +31,7 @@ namespace AdventOfCode.Year2020.Day05
                 seatIds.Add(GetSeatId(code));
             }
 
-            var sortedSeatIds = seatIds.OrderBy(x => x).ToList();
+            var sortedSeatIds = seatIds.Sort(SortRule.OrderByAscending);
             var last = sortedSeatIds.Count - 1;
             var mySeatId = 0;
 
@@ -52,7 +53,7 @@ namespace AdventOfCode.Year2020.Day05
             return mySeatId.ToString();
         }
 
-        private int GetSeatId(string code)
+        private static int GetSeatId(string code)
         {
             var row = GetRowNumber(code);
             var col = GetColumnNumber(code);
@@ -62,17 +63,17 @@ namespace AdventOfCode.Year2020.Day05
             return row + col;
         }
 
-        private int GetRowNumber(string code)
+        private static int GetRowNumber(string code)
         {
             return GetPosition(code.Substring(_rowSubString.Start, _rowSubString.Length), _minRow, _maxRow, _frontChar);
         }
 
-        private int GetColumnNumber(string code)
+        private static int GetColumnNumber(string code)
         {
             return GetPosition(code.Substring(_columnSubString.Start, _columnSubString.Length), _minCol, _maxCol, _leftChar);
         }
 
-        private int GetPosition(string code, int lower, int upper, char upperChar)
+        private static int GetPosition(string code, int lower, int upper, char upperChar)
         {
             var total = upper + 1;
             var last = code.Length - 1;

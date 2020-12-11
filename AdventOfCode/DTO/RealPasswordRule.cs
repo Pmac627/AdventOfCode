@@ -1,24 +1,24 @@
 ﻿namespace AdventOfCode.DTO
 {
-    public class PasswordRule
+    public class RealPasswordRule
     {
         private const char _segmentDelimiter = ' ';
         private const char _minMaxRuleDelimiter = '-';
 
-        public PasswordRule(string value)
+        public RealPasswordRule(string value)
         {
             var parts = value.Split(_segmentDelimiter);
             var sizeRules = parts[0].Split(_minMaxRuleDelimiter);
             var charRule = parts[1].Substring(0, 1);
 
-            if (int.TryParse(sizeRules[0], out var minCount))
+            if (int.TryParse(sizeRules[0], out var index1))
             {
-                MinCount = minCount;
+                Index1 = index1 - 1;
             }
 
-            if (int.TryParse(sizeRules[1], out var maxCount))
+            if (int.TryParse(sizeRules[1], out var index2))
             {
-                MaxCount = maxCount;
+                Index2 = index2 - 1;
             }
 
             if (char.TryParse(charRule, out var character))
@@ -29,29 +29,23 @@
             Password = parts[2].ToCharArray();
         }
 
-        public int MinCount { get; init; }
-        public int MaxCount { get; init; }
+        public int Index1 { get; init; }
+        public int Index2 { get; init; }
         public char Character { get; init; }
         public char[] Password { get; init; }
 
         public bool IsValid()
         {
-            var total = 0;
+            var valid = false;
+            var maxIndex = Password.Length - 1;
 
-            for (var i = Password.Length - 1; i >= 0; i--)
+            if (Index1 <= maxIndex && Index2 <= maxIndex)
             {
-                if (Password[i] == Character)
-                {
-                    ++total;
-                }
+                valid = (Character == Password[Index1] && Character != Password[Index2])
+                    || (Character != Password[Index1] && Character == Password[Index2]);
             }
 
-            if (total >= MinCount && total <= MaxCount)
-            {
-                return true;
-            }
-
-            return false;
+            return valid;
         }
     }
 }

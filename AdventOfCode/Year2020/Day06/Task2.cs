@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day06
 {
-	[ExpectedResult("3268")]
+    [ExpectedResult("3268")]
     public class Task2 : IRunnableCode
     {
         public async Task<string> ExecuteAsync(string[] data)
@@ -37,7 +37,7 @@ namespace AdventOfCode.Year2020.Day06
             return answerTotal.ToString();
         }
 
-        private int GetAllSameAnswerCount(int totalMembers, IList<int> answers)
+        private static int GetAllSameAnswerCount(int totalMembers, IList<int> answers)
         {
             var answerTotal = 0;
 
@@ -52,7 +52,7 @@ namespace AdventOfCode.Year2020.Day06
             return answerTotal;
         }
 
-        private void PopulateGroupAnswers(IEnumerable<char> chars, ref Dictionary<char, int> groupAnswers)
+        private static void PopulateGroupAnswers(IEnumerable<char> chars, ref Dictionary<char, int> groupAnswers)
         {
             foreach (var c in chars)
             {

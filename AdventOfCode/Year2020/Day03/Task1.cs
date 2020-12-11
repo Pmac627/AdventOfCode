@@ -8,12 +8,13 @@ namespace AdventOfCode.Year2020.Day03
 	public class Task1 : IRunnableCode
 	{
 		private const char _treeChar = '#';
+		private static readonly (int Right, int Down) _path = (3, 1);
 
 		public async Task<string> ExecuteAsync(string[] data)
 		{
 			var maxIndex = data[0].Length - 1;
 
-			var totalTrees = CalculatePath(3, 1, maxIndex, data);
+			var totalTrees = CalculatePath(_path.Right, _path.Down, maxIndex, data);
 
 			return totalTrees.ToString();
 		}

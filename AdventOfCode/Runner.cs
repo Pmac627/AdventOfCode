@@ -21,17 +21,20 @@ namespace AdventOfCode
         private const int _maxDay = 25;
         private const int _minPuzzle = 1;
         private const int _maxPuzzle = 2;
+        private const int _minMenuChoice = 0;
+        private const int _maxMenuChoice = 6;
         private const int _horizontalRuleLength = 50;
         private const int _validCurrentMonth = 12;
         private const int _exitPauseInSeconds = 1;
         private const int _gracefulExitCode = 0;
 
-        private const char _validInput0 = '0';
-        private const char _validInput1 = '1';
-        private const char _validInput2 = '2';
-        private const char _validInput3 = '3';
-        private const char _validInput4 = '4';
-        private const char _validInput5 = '5';
+        private const char _validInputZero = '0';
+        private const char _validInputOne = '1';
+        private const char _validInputTwo = '2';
+        private const char _validInputThree = '3';
+        private const char _validInputFour = '4';
+        private const char _validInputFive = '5';
+        private const char _validInputSix = '6';
         private const char _validNextStepLowerY = 'y';
         private const char _validNextStepUpperY = 'Y';
         private const char _validNextStepLowerN = 'n';
@@ -72,28 +75,32 @@ namespace AdventOfCode
 
             switch (option.KeyChar)
             {
-                case _validInput1:
+                case _validInputOne:
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle1));
 
                     break;
-                case _validInput2:
+                case _validInputTwo:
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle2));
 
                     break;
-                case _validInput3:
+                case _validInputThree:
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle1));
                     puzzles.Add(new Puzzle(currentDate.Year, currentDate.Day, puzzle2));
 
                     break;
-                case _validInput4:
+                case _validInputFour:
+                    puzzles.AddRange(CreateListOfSpecificDaysPuzzles(currentDate));
+
+                    break;
+                case _validInputFive:
                     puzzles.AddRange(CreateListOfAllPuzzles(currentDate));
 
                     break;
-                case _validInput5:
+                case _validInputSix:
                     GenerateExitMessage();
 
                     break;
-                case _validInput0:
+                case _validInputZero:
                 default:
                     puzzles.Add(GenerateManualRunMenu());
 
@@ -142,12 +149,13 @@ namespace AdventOfCode
         {
             Console.WriteLine(" Welcome! Please choose an option:");
             Console.WriteLine();
-            Console.WriteLine($" [{_validInput0}]  Enter Date & Puzzle (default)");
-            Console.WriteLine($" [{_validInput1}]  Run Today, Puzzle 1");
-            Console.WriteLine($" [{_validInput2}]  Run Today, Puzzle 2");
-            Console.WriteLine($" [{_validInput3}]  Run Today, Both Puzzles");
-            Console.WriteLine($" [{_validInput4}]  Run All");
-            Console.WriteLine($" [{_validInput5}]  Exit");
+            Console.WriteLine($" [{_validInputZero}]  Enter Date & Puzzle (default)");
+            Console.WriteLine($" [{_validInputOne}]  Run Today, Puzzle 1");
+            Console.WriteLine($" [{_validInputTwo}]  Run Today, Puzzle 2");
+            Console.WriteLine($" [{_validInputThree}]  Run Today, Both Puzzles");
+            Console.WriteLine($" [{_validInputFour}]  Run Specific Day's Puzzles");
+            Console.WriteLine($" [{_validInputFive}]  Run All");
+            Console.WriteLine($" [{_validInputSix}]  Exit");
 
             Console.WriteLine();
             Console.Write(" Selection: ");
@@ -155,12 +163,23 @@ namespace AdventOfCode
 
             Console.WriteLine();
 
+            if (!char.IsNumber(option.KeyChar))
+            {
+                Console.WriteLine();
+                Console.ForegroundColor = _errorFontColor;
+                Console.WriteLine($" Only a number between {_minMenuChoice} and {_maxMenuChoice} is allowed. You entered: {option.KeyChar}. Please select again.");
+                Console.ForegroundColor = _defaultFontColor;
+                Console.WriteLine();
+
+                return GenerateMenu();
+            }
+
             return option;
         }
 
         private static void ValidateRunTodayIsAllowed(DateTime currentDate, char selectedOption)
         {
-            if (new char[3] { _validInput1, _validInput2, _validInput3 }.Contains(selectedOption) &&
+            if (new char[3] { _validInputOne, _validInputTwo, _validInputThree }.Contains(selectedOption) &&
                 (
                     (currentDate.Month != _validCurrentMonth) ||
                     currentDate.Year < _minYear || currentDate.Year > _maxYear ||
@@ -170,6 +189,38 @@ namespace AdventOfCode
             {
                 throw new ArgumentOutOfRangeException($" This option only works during the period of December {_minDay}st - {_maxDay}th of valid years.");
             }
+        }
+
+        private static IList<Puzzle> CreateListOfSpecificDaysPuzzles(DateTime currentDate)
+        {
+            var puzzles = new List<Puzzle>();
+
+            Console.Write(" Day: ");
+            var dayInput = GetLineInput();
+
+            if (!int.TryParse(dayInput, out var day))
+            {
+                throw new ArgumentException($" Input day is invalid. Entered: {dayInput}.");
+            }
+
+            if (day < _minDay || day > _maxDay)
+            {
+                throw new ArgumentOutOfRangeException($" Input day is invalid. Must be between {_minDay} and {_maxDay} (inclusive). Entered: {day}.");
+            }
+
+            var year = currentDate.Year;
+
+            if (year > _maxYear)
+            {
+                year = _maxYear;
+            }
+
+            for (var p = _minPuzzle; p <= _maxPuzzle; p++)
+            {
+                puzzles.Add(new Puzzle(year, day, p));
+            }
+
+            return puzzles;
         }
 
         private static IList<Puzzle> CreateListOfAllPuzzles(DateTime currentDate)
@@ -206,12 +257,12 @@ namespace AdventOfCode
 
             if (!int.TryParse(yearInput, out var year))
             {
-                throw new ArgumentException($" Input year is invalid. Entered: {yearInput}");
+                throw new ArgumentException($" Input year is invalid. Entered: {yearInput}.");
             }
 
             if (year < _minYear || year > _maxYear)
             {
-                throw new ArgumentOutOfRangeException($" Input year is invalid. Must be between {_minYear} and {_maxYear} (inclusive). Entered: {year}");
+                throw new ArgumentOutOfRangeException($" Input year is invalid. Must be between {_minYear} and {_maxYear} (inclusive). Entered: {year}.");
             }
 
             Console.Write(" Day: ");
@@ -219,12 +270,12 @@ namespace AdventOfCode
 
             if (!int.TryParse(dayInput, out var day))
             {
-                throw new ArgumentException($" Input day is invalid. Entered: {dayInput}");
+                throw new ArgumentException($" Input day is invalid. Entered: {dayInput}.");
             }
 
             if (day < _minDay || day > _maxDay)
             {
-                throw new ArgumentOutOfRangeException($" Input day is invalid. Must be between {_minDay} and {_maxDay} (inclusive). Entered: {day}");
+                throw new ArgumentOutOfRangeException($" Input day is invalid. Must be between {_minDay} and {_maxDay} (inclusive). Entered: {day}.");
             }
 
             Console.Write(" Puzzle: ");
@@ -232,12 +283,12 @@ namespace AdventOfCode
 
             if (!int.TryParse(puzzleInput, out var puzzle))
             {
-                throw new ArgumentException($" Input puzzle number is invalid. Entered: {puzzleInput}");
+                throw new ArgumentException($" Input puzzle number is invalid. Entered: {puzzleInput}.");
             }
 
             if (puzzle != _minPuzzle && puzzle != _maxPuzzle)
             {
-                throw new ArgumentOutOfRangeException($" Input puzzle number is invalid. Must be either {_minPuzzle} or {_maxPuzzle}. Entered: {puzzle}");
+                throw new ArgumentOutOfRangeException($" Input puzzle number is invalid. Must be either {_minPuzzle} or {_maxPuzzle}. Entered: {puzzle}.");
             }
 
             return new Puzzle(year, day, puzzle);
@@ -323,7 +374,7 @@ namespace AdventOfCode
                             }
 
                             Console.ForegroundColor = _timerReadoutFontColor;
-                            Console.WriteLine($" Run time: {runTimeInMs}ms");
+                            Console.WriteLine($" Run time: {runTimeInMs}ms.");
                             Console.ForegroundColor = _defaultFontColor;
                         }
                         else

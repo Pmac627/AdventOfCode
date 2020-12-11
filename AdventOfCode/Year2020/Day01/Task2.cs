@@ -1,7 +1,7 @@
-﻿using AdventOfCode.DTO.Attributes;
+﻿using AdventOfCode.DataManagement;
+using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day01
@@ -15,7 +15,7 @@ namespace AdventOfCode.Year2020.Day01
         {
             try
             {
-                var numbers = data.Select(x => int.Parse(x)).ToList();
+                var numbers = data.ToNumberList<int>();
 
                 for (var i = numbers.Count - 1; i >= 0; i--)
                 {
@@ -43,7 +43,7 @@ namespace AdventOfCode.Year2020.Day01
             }
         }
 
-        private long Multiply(int first, int second, int third)
+        private static long Multiply(int first, int second, int third)
         {
             return first * second * third;
         }

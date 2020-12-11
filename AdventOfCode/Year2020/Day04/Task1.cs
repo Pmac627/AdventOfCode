@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day04
 {
-	[ExpectedResult("192")]
+    [ExpectedResult("192")]
     public class Task1 : IRunnableCode
     {
         private const int _requiredValidParts = 7;
@@ -52,12 +52,12 @@ namespace AdventOfCode.Year2020.Day04
             return validCount.ToString();
         }
 
-        private bool IsValid (int count)
+        private static bool IsValid (int count)
         {
             return count >= _requiredValidParts;
         }
 
-        private int CountMatchingCodes(string[] codesProvided)
+        private static int CountMatchingCodes(string[] codesProvided)
         {
             var matches = 0;
 

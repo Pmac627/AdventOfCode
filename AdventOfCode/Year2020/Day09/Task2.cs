@@ -1,4 +1,5 @@
-﻿using AdventOfCode.DTO.Attributes;
+﻿using AdventOfCode.DataManagement;
+using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace AdventOfCode.Year2020.Day09
 
         public async Task<string> ExecuteAsync(string[] data)
         {
-            var numbers = data.Select(x => long.Parse(x)).ToList();
+            var numbers = data.ToNumberList<long>();
 
             var contiguousNumbers = new List<long>();
 

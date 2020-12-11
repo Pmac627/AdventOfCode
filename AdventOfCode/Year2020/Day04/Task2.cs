@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day04
 {
-	[ExpectedResult("101")]
+    [ExpectedResult("101")]
     public class Task2 : IRunnableCode
     {
         private const int _requiredValidParts = 7;
@@ -138,12 +138,12 @@ namespace AdventOfCode.Year2020.Day04
             return validCount.ToString();
         }
 
-        private bool IsValid(int count)
+        private static bool IsValid(int count)
         {
             return count >= _requiredValidParts;
         }
 
-        private bool ValidateBirthYear(string value)
+        private static bool ValidateBirthYear(string value)
         {
             if (int.TryParse(value, out var year))
             {
@@ -153,7 +153,7 @@ namespace AdventOfCode.Year2020.Day04
             return false;
         }
 
-        private bool ValidateIssueYear(string value)
+        private static bool ValidateIssueYear(string value)
         {
             if (int.TryParse(value, out var year))
             {
@@ -163,7 +163,7 @@ namespace AdventOfCode.Year2020.Day04
             return false;
         }
 
-        private bool ValidateExpireYear(string value)
+        private static bool ValidateExpireYear(string value)
         {
             if (int.TryParse(value, out var year))
             {
@@ -173,7 +173,7 @@ namespace AdventOfCode.Year2020.Day04
             return false;
         }
 
-        private bool ValidateHeight(string value)
+        private static bool ValidateHeight(string value)
         {
             if (value.EndsWith(_heightCmSuffix))
             {
@@ -203,7 +203,7 @@ namespace AdventOfCode.Year2020.Day04
             }
         }
 
-        private bool ValidateHairColor(string value)
+        private static bool ValidateHairColor(string value)
         {
             if (value.Length == _hairColorCodeLength)
             {
@@ -213,7 +213,7 @@ namespace AdventOfCode.Year2020.Day04
             return false;
         }
 
-        private bool ValidateEyeColor(string value)
+        private static bool ValidateEyeColor(string value)
         {
             if (_eyeColorOptions.Contains(value))
             {
@@ -223,7 +223,7 @@ namespace AdventOfCode.Year2020.Day04
             return false;
         }
 
-        private bool ValidatePassportId(string value)
+        private static bool ValidatePassportId(string value)
         {
             if (value.Length == _passportIdLength)
             {

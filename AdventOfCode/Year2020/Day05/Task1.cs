@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day05
 {
-	[ExpectedResult("806")]
+    [ExpectedResult("806")]
     public class Task1 : IRunnableCode
     {
         private const int _minRow = 0;
@@ -35,7 +35,7 @@ namespace AdventOfCode.Year2020.Day05
             return highest.ToString();
         }
 
-        private int GetSeatId(string code)
+        private static int GetSeatId(string code)
         {
             var row = GetRowNumber(code);
             var col = GetColumnNumber(code);
@@ -45,17 +45,17 @@ namespace AdventOfCode.Year2020.Day05
             return row + col;
         }
 
-        private int GetRowNumber(string code)
+        private static int GetRowNumber(string code)
         {
             return GetPosition(code.Substring(_rowSubString.Start, _rowSubString.Length), _minRow, _maxRow, _frontChar);
         }
 
-        private int GetColumnNumber(string code)
+        private static int GetColumnNumber(string code)
         {
             return GetPosition(code.Substring(_columnSubString.Start, _columnSubString.Length), _minCol, _maxCol, _leftChar);
         }
 
-        private int GetPosition(string code, int lower, int upper, char upperChar)
+        private static int GetPosition(string code, int lower, int upper, char upperChar)
         {
             var total = upper + 1;
             var last = code.Length - 1;

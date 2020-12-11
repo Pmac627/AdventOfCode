@@ -20,10 +20,7 @@ namespace AdventOfCode.Year2020.Day08
         {
             var accumulator = 0;
            
-            var instructions = data.Select(x => {
-                var parts = x.Split(_instructionPartDelimiter);
-                return new Instruction(parts[0], parts[1]);
-            }).ToList();
+            var instructions = data.Select(x => new Instruction(x , _instructionPartDelimiter)).ToList();
 
             accumulator = RunProgram(instructions);
 

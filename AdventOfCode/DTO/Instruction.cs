@@ -2,11 +2,15 @@
 {
     public class Instruction
     {
-        public Instruction(string operation, string increment)
-        {
-            Operation = operation;
+        private const char _instructionPartDelimiter = ' ';
 
-            if (int.TryParse(increment, out var inc))
+        public Instruction(string instruction, char instructionPartDelimiter = _instructionPartDelimiter)
+        {
+            var parts = instruction.Split(instructionPartDelimiter);
+
+            Operation = parts[0];
+
+            if (int.TryParse(parts[1], out var inc))
             {
                 Increment = inc;
             }

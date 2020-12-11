@@ -14,8 +14,8 @@ namespace AdventOfCode.Year2020.Day02
 
             for (var i = totalValid - 1; i >= 0; i--)
             {
-                var passwordRule = new PasswordRule(data[i]);
-                if (!passwordRule.IsValid())
+                var realPasswordRule = new RealPasswordRule(data[i]);
+                if (!realPasswordRule.IsValid())
                 {
                     --totalValid;
                 }

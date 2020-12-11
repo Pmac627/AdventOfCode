@@ -1,7 +1,7 @@
-﻿using AdventOfCode.DTO.Attributes;
+﻿using AdventOfCode.DataManagement;
+using AdventOfCode.DTO.Attributes;
 using AdventOfCode.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day09
@@ -13,7 +13,8 @@ namespace AdventOfCode.Year2020.Day09
 
         public async Task<string> ExecuteAsync(string[] data)
         {
-            var numbers = data.Select(x => long.Parse(x)).ToList();
+            var numbers = data.ToNumberList<long>();
+
             var preamble = numbers.GetRange(_preambleRange.Index, _preambleRange.Length);
             var remaining = numbers.GetRange(_preambleRange.Length, numbers.Count - _preambleRange.Length);
 

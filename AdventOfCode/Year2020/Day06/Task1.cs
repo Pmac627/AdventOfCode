@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode.Year2020.Day06
 {
-	[ExpectedResult("6612")]
+    [ExpectedResult("6612")]
     public class Task1 : IRunnableCode
     {
         public async Task<string> ExecuteAsync(string[] data)
@@ -34,7 +34,7 @@ namespace AdventOfCode.Year2020.Day06
             return answerTotal.ToString();
         }
 
-        private void PopulateUniqueAnswers(IEnumerable<char> chars, ref HashSet<char> uniqueAnswers)
+        private static void PopulateUniqueAnswers(IEnumerable<char> chars, ref HashSet<char> uniqueAnswers)
         {
             foreach (var c in chars)
             {
